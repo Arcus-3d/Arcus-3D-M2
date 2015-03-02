@@ -53,17 +53,16 @@ Component for checking functionality of thermistors
 TODO
 """;
 license "GPL";
-variable float last_temp = 0.0;
-variable bool last_enable = 0;
-variable float oldwait = 0.0;
+variable hal_float_t last_temp = 0.0;
+variable hal_bit_t last_enable = 0;
+variable hal_float_t oldwait = 0.0;
 variable int t_secs = 0;
 variable int t_nsecs = 0;
 variable int c_secs = 0;
 variable int c_nsecs = 0;
-variable bool start = 0;
+variable hal_bit_t start = 0;
 ;;
 FUNCTION(_) {
-    bool active;
     float temp_change;
     float time;
     
