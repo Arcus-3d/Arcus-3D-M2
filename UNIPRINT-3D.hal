@@ -16,7 +16,7 @@ loadrt trivkins
 loadrt tp
 
 # motion controller, get name and thread periods from ini file
-loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=5 num_aio=50 num_dio=20 #[TRAJ]AXES kins=trivkins
+loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=5 num_aio=51 num_dio=21 #[TRAJ]AXES kins=trivkins
 
 # THREADS
 #loadrt threads name1=run-thread period1=50170000
@@ -40,16 +40,15 @@ loadrt wcomp names=wcomp.e0-temp-range,wcomp.hbp-temp-range,wcomp.e0-temp-limit,
 loadrt lowpass names=lowpass.e0-temp,lowpass.hbp-temp
 loadrt sum2 names=sum2.e0-temp-range-neg,sum2.e0-temp-range-pos,sum2.hbp-temp-range-neg,sum2.hbp-temp-range-pos,sum2.extrude-rate-adj
 loadrt and2 names=and2.probe
-loadrt mux2 names=mux2.exp0-pwm,mux2.ve-base-vel,mux2.jog-velocity-signed
+loadrt mux2 names=mux2.exp0-pwm,mux2.ve-base-vel,mux2.jog-velocity-signed,mux2.stepgen04-maxvel,mux2.stepgen04-maxacc,mux2.stepgen04-scale
 loadrt logic names=estopchain,and3.e0-no-error,and3.hbp-no-error personality=0x205,0x103,0x103 # or 5 and 3 inputs
-loadrt comp names=comp.exp0-temp,comp.hbp-hot,comp.e0-active,comp.hbp-active
+loadrt comp names=comp.exp0-temp,comp.hbp-hot,comp.hbp-info,comp.e0-active,comp.hbp-active
 loadrt select8 names=select8.extruder
 loadrt watchdog num_inputs=3
 loadrt mux_generic config=bb4 # mux-gen.00 for probe
 loadrt conv_float_u32 names=f2u.probe-sel
 loadrt logic_fuse names=logic-fuse.gpio-error,logic-fuse.pwm-error,logic-fuse.temp-error,logic-fuse.hbp-error,logic-fuse.e0-error
 loadrt estop_latch names=estop-latch
-loadrt charge_pump names=charge-pump
 
 loadrt hypot names=hypot.nozzle-vel
 loadrt mult2 names=mult2.nozzle-discharge,mult2.filament-dia,mult2.filament-area,mult2.extrude-accel-adj,mult2.ve-jog-dtg,mult2.retract-vel-neg,mult2.extrude-rate-scaled,mult2.jog-velocity-neg
@@ -112,6 +111,7 @@ addf   comp.exp0-temp                       servo-thread
 addf   mux2.exp0-pwm                        servo-thread
 addf   select8.extruder                     servo-thread
 addf   comp.hbp-hot                         servo-thread
+addf   comp.hbp-info                        servo-thread
 
 # Estop chain
 addf   thermistor-check.e0                  servo-thread
@@ -150,6 +150,10 @@ addf reset.extruder-en2                     servo-thread
 addf div2.retract-time                      servo-thread
 addf oneshot.retract                        servo-thread
 addf mux4.ve                                servo-thread
+
+addf mux2.stepgen04-maxvel                  servo-thread
+addf mux2.stepgen04-maxacc                  servo-thread
+addf mux2.stepgen04-scale                   servo-thread
 
 addf   charge-pump                          servo-thread
 
@@ -591,8 +595,13 @@ sets emcmot.03.enable TRUE
 #net motor.04.pos-fb <= hpg.stepgen.04.position-fb
 #net motor.04.pos-fb => axis.3.motor-pos-fb
 
+net stepgen04-pos-cmd hpg.stepgen.04.position-cmd
+net stepgen04-pos-fb hpg.stepgen.04.position-fb
+
 # timing parameters
-setp hpg.stepgen.04.control-type    1
+#setp hpg.stepgen.04.control-type    1
+net stepgen04-sel hpg.stepgen.04.control-type
+sets stepgen04-sel 1
 
 setp hpg.stepgen.04.dirsetup        [AXIS_3]DIRSETUP
 setp hpg.stepgen.04.dirhold         [AXIS_3]DIRHOLD
@@ -600,10 +609,28 @@ setp hpg.stepgen.04.dirhold         [AXIS_3]DIRHOLD
 setp hpg.stepgen.04.steplen         [AXIS_3]STEPLEN
 setp hpg.stepgen.04.stepspace       [AXIS_3]STEPSPACE
 
-setp hpg.stepgen.04.position-scale  [AXIS_3]SCALE
+#setp hpg.stepgen.04.position-scale  [AXIS_3]SCALE
 
-setp hpg.stepgen.04.maxvel          [AXIS_3]STEPGEN_MAX_VEL
-setp hpg.stepgen.04.maxaccel        [AXIS_3]STEPGEN_MAX_ACC
+#setp hpg.stepgen.04.maxvel          [AXIS_3]STEPGEN_MAX_VEL
+#setp hpg.stepgen.04.maxaccel        [AXIS_3]STEPGEN_MAX_ACC
+
+net stepgen04-sel mux2.stepgen04-scale.sel
+net stepgen04-scale hpg.stepgen.04.position-scale
+net stepgen04-scale mux2.stepgen04-scale.out
+setp mux2.stepgen04-scale.in0      [ABP]SCALE
+setp mux2.stepgen04-scale.in1      [AXIS_3]SCALE
+
+net stepgen04-sel mux2.stepgen04-maxvel.sel
+net stepgen04-maxvel hpg.stepgen.04.maxvel
+net stepgen04-maxvel mux2.stepgen04-maxvel.out
+setp mux2.stepgen04-maxvel.in0      [ABP]STEPGEN_MAX_VEL
+setp mux2.stepgen04-maxvel.in1      [AXIS_3]STEPGEN_MAX_VEL
+
+net stepgen04-sel mux2.stepgen04-maxacc.sel
+net stepgen04-maxacc hpg.stepgen.04.maxaccel
+net stepgen04-maxacc mux2.stepgen04-maxacc.out
+setp mux2.stepgen04-maxacc.in0      [ABP]STEPGEN_MAX_ACC
+setp mux2.stepgen04-maxacc.in1      [AXIS_3]STEPGEN_MAX_ACC
 
 #setp hpg.stepgen.04.step_type       0
 setp hpg.stepgen.04.steppin         [AXIS_3]STEPPIN
@@ -637,11 +664,12 @@ net tool-change-loop iocontrol.0.tool-change => iocontrol.0.tool-changed
 #setp bb_gpio.p8.out-07.invert 1
 
 # Machine power
-net emcmot.00.enable => bb_gpio.p8.out-07
+#net emcmot.00.enable => bb_gpio.p8.out-07
 
 # Tie machine power signal to the Parport Cape LED
 # Feel free to tie any other signal you like to the LED
 net emcmot.00.enable => bb_gpio.p8.out-26
+setp bb_gpio.p8.out-26.invert true
 
 # ################
 # Limit Switches
@@ -1005,6 +1033,11 @@ setp comp.hbp-hot.hyst 2.0
 net hbp.temp.meas => comp.hbp-hot.in1
 net l0.hbp-hot <= comp.hbp-hot.out
 
+setp comp.hbp-info.in1 50.0
+setp comp.hbp-info.hyst 2.0
+net hbp.temp.meas => comp.hbp-info.in0
+net l0.hbp-info <= comp.hbp-info.out
+
 # ##################################################
 # Fans
 # ##################################################
@@ -1227,10 +1260,12 @@ net ve.line-height       <= motion.analog-out-43
 net ve.filament-dia      <= motion.analog-out-io-44
 net ve.jog-velocity      <= motion.analog-out-io-45
 net ve.jog-distance      <= motion.analog-out-io-46
+net stepgen04-pos-cmd    <= motion.analog-out-io-50
 
 net probe.enable         <= motion.digital-out-00
 net ve.extruder-en       <= motion.digital-out-io-01
 net ve.jog-trigger       <= motion.digital-out-io-02
+net stepgen04-sel        <= motion.digital-out-io-20
 
 net hbp.temp.meas        => motion.analog-in-00
 #net hbc.temp.meas        => motion.analog-in-01
@@ -1243,6 +1278,7 @@ net l0.r                 => motion.analog-in-26
 net l0.g                 => motion.analog-in-27
 net l0.b                 => motion.analog-in-28
 net l0.w                 => motion.analog-in-29
+net stepgen04-pos-fb     => motion.analog-in-50
 
 net hbp.temp.in-range   => motion.digital-in-00
 #net hbc.temp.in-range   => motion.digital-in-01
@@ -1286,11 +1322,13 @@ net temp-watchdog => watchdog.input-2
 setp watchdog.timeout-2 0.1
 net estop-out => watchdog.enable-in
 
-# drive estop-sw
+# charge pump tied to machine power
 net charge-pump-out charge-pump.out => bb_gpio.p8.out-19
-net estop-out => charge-pump.enable
-#net estop-out => bb_gpio.p8.out-19
-#setp bb_gpio.p8.out-19.invert 1
+net emcmot.00.enable => charge-pump.enable
+
+# drive estop-sw
+net estop-out => bb_gpio.p8.out-07
+setp bb_gpio.p8.out-07.invert 1
 
 # ##################################################
 # UI linking
