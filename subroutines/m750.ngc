@@ -1,0 +1,42 @@
+o<m750> sub
+#501=20; digital io index
+#502=50; analog io index
+#503=0.0; abp start pos
+#504=140.0; abp end pos
+#505=0.1; dwell
+#506=0.0; y start pos
+#507=130.0; y end pos
+
+G0 Y130
+T2; select extruder without real motor
+M65 P#501
+G4 P#505; let the ios settle
+
+#5399=1.0
+M68 E#502 Q#503
+o103 while [#5399 NE #503]
+G4 P#505
+M66 E#502 L0
+o103 endwhile
+
+T1; select real abp
+G4 P#505; let the ios settle
+
+#5399=#503
+M68 E#502 Q#504
+o101 while [#5399 LT #504]
+G4 P#505
+M66 E#502 L0
+o101 endwhile
+
+#5399=#504
+M68 E#502 Q#503
+o102 while [#5399 GT #503]
+G4 P#505
+M66 E#502 L0
+o102 endwhile
+
+M64 P#501
+T0
+G0 Y0
+o<m750> end sub
