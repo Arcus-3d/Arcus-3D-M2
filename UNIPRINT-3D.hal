@@ -6,9 +6,6 @@
 #
 # ########################################
 
-# start haltalk server
-loadusr -W haltalk
-
 # ###################################
 # Core EMC/HAL Loads
 # ###################################
@@ -43,12 +40,14 @@ loadrt lowpass names=lowpass.e0-temp,lowpass.hbp-temp
 loadrt sum2 names=sum2.e0-temp-range-neg,sum2.e0-temp-range-pos,sum2.hbp-temp-range-neg,sum2.hbp-temp-range-pos,sum2.extrude-rate-adj
 loadrt and2 names=and2.probe
 loadrt mux2 names=mux2.exp0-pwm,mux2.ve-base-vel,mux2.jog-velocity-signed
-loadrt logic names=estopchain,and3.e0-no-error,and3.hbp-no-error personality=0x108,0x103,0x103 # and 8 and 3 inputs
+loadrt logic names=estopchain,and3.e0-no-error,and3.hbp-no-error personality=0x105,0x103,0x103 # and 5 and 3 inputs
 loadrt comp names=comp.exp0-temp,comp.hbp-hot,comp.e0-active,comp.hbp-active
 loadrt select8 names=select8.extruder
 loadrt watchdog num_inputs=3
 loadrt mux_generic config=bb4 # mux-gen.00 for probe
 loadrt conv_float_u32 names=f2u.probe-sel
+loadrt logic_fuse names=logic-fuse.gpio-error,logic-fuse.pwm-error,logic-fuse.temp-error,logic-fuse.hbp-error,logic-fuse.e0-error
+loadrt estop_latch names=estop-latch
 
 loadrt hypot names=hypot.nozzle-vel
 loadrt mult2 names=mult2.nozzle-discharge,mult2.filament-dia,mult2.filament-area,mult2.extrude-accel-adj,mult2.ve-jog-dtg,mult2.retract-vel-neg,mult2.extrude-rate-scaled,mult2.jog-velocity-neg
@@ -115,9 +114,15 @@ addf   comp.hbp-hot                         servo-thread
 # Estop chain
 addf   thermistor-check.e0                  servo-thread
 addf   thermistor-check.hbp                 servo-thread
+addf   logic-fuse.gpio-error                servo-thread
+addf   logic-fuse.pwm-error                 servo-thread
+addf   logic-fuse.temp-error                servo-thread
+addf   logic-fuse.hbp-error                 servo-thread
+addf   logic-fuse.e0-error                  servo-thread
 addf   watchdog.set-timeouts                servo-thread
 addf   watchdog.process                     servo-thread
 addf   estopchain                           servo-thread
+addf   estop-latch                          servo-thread
 
 # velocity extruding
 addf hypot.nozzle-vel                       servo-thread
@@ -173,9 +178,17 @@ loadusr -Wn i2c-temp hal_temp_ads7828 --name i2c-temp --bus_id 2 --address 72 --
 # Python user-mode HAL module for storing values
 loadusr -Wn storage hal_storage -n storage -f storage.ini -a
 
-net gpio-ok <= i2c-gpio.no-error
-net pwm-ok <= i2c-pwm.no-error
-net temp-ok <= i2c-temp.no-error
+net gpio-error-in <= i2c-gpio.error
+net gpio-error-in => logic-fuse.gpio-error.in
+net gpio-error <= logic-fuse.gpio-error.out
+
+net pwm-error-in <= i2c-pwm.error
+net pwm-error-in => logic-fuse.pwm-error.in
+net pwm-error <= logic-fuse.pwm-error.out
+
+net temp-error-in <= i2c-temp.error
+net temp-error-in => logic-fuse.temp-error.in
+net temp-error <= logic-fuse.temp-error.out
 
 net gpio-watchdog <= i2c-gpio.watchdog
 net pwm-watchdog <= i2c-pwm.watchdog
@@ -602,12 +615,15 @@ setp hpg.stepgen.04.dirpin          [AXIS_3]DIRPIN
 # Create estop signal chain
 # Drive software estop to hardware
 newsig estop-user bit
+newsig estop-reset bit
 newsig estop-out bit
+newsig estop-loop bit
 
 net estop-user <= iocontrol.0.user-enable-out
+net estop-reset <= iocontrol.0.user-request-enable
 
 # Monitor estop input from hardware
-net estop-loop bb_gpio.p9.in-41 => iocontrol.0.emc-enable-in
+net estop-in bb_gpio.p9.in-41 => iocontrol.0.emc-enable-in
 setp bb_gpio.p9.in-41.invert 1
 
 # create signals for tool loading loopback
@@ -770,7 +786,9 @@ net e0.temp.in-limit => and3.e0-no-error.in-01
 net temp-ok          => and3.e0-no-error.in-02
 net e0.no-error      <= and3.e0-no-error.and
 net e0.no-error      => not.e0-error.in
-net e0.error         <= not.e0-error.out
+net e0.error-in      <= not.e0-error.out
+net e0.error-in      => logic-fuse.e0-error.in
+net e0.error         <= logic-fuse.e0-error.out
 
 setp comp.e0-active.in0 0.0001
 setp comp.e0-active.hyst 0.0
@@ -891,7 +909,9 @@ net hbp.temp.in-limit => and3.hbp-no-error.in-01
 net temp-ok           => and3.hbp-no-error.in-02
 net hbp.no-error      <= and3.hbp-no-error.and
 net hbp.no-error      => not.hbp-error.in
-net hbp.error         <= not.hbp-error.out
+net hbp.error-in      <= not.hbp-error.out
+net hbp.error-in      => logic-fuse.hbp-error.in
+net hbp.error         <= logic-fuse.hbp-error.out
 
 setp comp.hbp-active.in0 0.0001
 setp comp.hbp-active.hyst 0.0
@@ -1231,15 +1251,28 @@ net ve.jog-trigger      => motion.digital-in-12
 # ##################################################
 # Estop chain, watchdog and charge-pump
 # ##################################################
-net estop-user          => estopchain.in-00
-net e0.temp.in-limit    => estopchain.in-01
-net e0.therm-ok         => estopchain.in-02
-net hbp.temp.in-limit   => estopchain.in-03
-net hbp.therm-ok        => estopchain.in-04
-net gpio-ok             => estopchain.in-05
-net pwm-ok              => estopchain.in-06
-net temp-ok             => estopchain.in-07
-net estop-out           <= estopchain.and
+net gpio-error    => estopchain.in-00
+net pwm-error     => estopchain.in-01
+net temp-error    => estopchain.in-02
+net hbp.error     => estopchain.in-03
+net e0.error      => estopchain.in-04
+net estop-error   <= estopchain.and
+
+net estop-user    => estop-latch.ok-in
+net estop-error   => estop-latch.fault-in
+net estop-reset   => estop-latch.reset
+net estop-out     <= estop-latch.ok-out
+
+net estop-reset => logic-fuse.gpio-error.reset
+setp logic-fuse.gpio-error.wait 0.5
+net estop-reset => logic-fuse.pwm-error.reset
+setp logic-fuse.pwm-error.wait 0.5
+net estop-reset => logic-fuse.temp-error.reset
+setp logic-fuse.temp-error.wait 0.5
+net estop-reset => logic-fuse.hbp-error.reset
+setp logic-fuse.hbp-error.wait 0.5
+net estop-reset => logic-fuse.e0-error.reset
+setp logic-fuse.e0-error.wait 0.5
 
 # TODO watchdog
 
@@ -1327,3 +1360,7 @@ net ve.retract-len     <=> storage.retract.length
 net ve.filament-dia    <=> storage.filament.diameter
 net ve.jog-velocity    <=> storage.extruder.jog-velocity
 setp storage.read-trigger 1 # trigger read
+
+# start haltalk server after everything is initialized
+# else binding the remote components on the UI might fail
+loadusr -W haltalk
