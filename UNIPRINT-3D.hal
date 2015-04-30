@@ -1,3 +1,4 @@
+
 # #######################################
 #
 # HAL file for BeagleBone + TCT paralell port cape with 5 steppers and 3D printer board
@@ -40,7 +41,7 @@ loadrt lowpass names=lowpass.e0-temp,lowpass.hbp-temp
 loadrt sum2 names=sum2.e0-temp-range-neg,sum2.e0-temp-range-pos,sum2.hbp-temp-range-neg,sum2.hbp-temp-range-pos,sum2.extrude-rate-adj
 loadrt and2 names=and2.probe
 loadrt mux2 names=mux2.exp0-pwm,mux2.ve-base-vel,mux2.jog-velocity-signed
-loadrt logic names=estopchain,and3.e0-no-error,and3.hbp-no-error personality=0x105,0x103,0x103 # and 5 and 3 inputs
+loadrt logic names=estopchain,and3.e0-no-error,and3.hbp-no-error personality=0x205,0x103,0x103 # or 5 and 3 inputs
 loadrt comp names=comp.exp0-temp,comp.hbp-hot,comp.e0-active,comp.hbp-active
 loadrt select8 names=select8.extruder
 loadrt watchdog num_inputs=3
@@ -186,6 +187,7 @@ net pwm-error-in <= i2c-pwm.error
 net pwm-error-in => logic-fuse.pwm-error.in
 net pwm-error <= logic-fuse.pwm-error.out
 
+net temp-ok <= i2c-temp.no-error
 net temp-error-in <= i2c-temp.error
 net temp-error-in => logic-fuse.temp-error.in
 net temp-error <= logic-fuse.temp-error.out
@@ -1256,7 +1258,7 @@ net pwm-error     => estopchain.in-01
 net temp-error    => estopchain.in-02
 net hbp.error     => estopchain.in-03
 net e0.error      => estopchain.in-04
-net estop-error   <= estopchain.and
+net estop-error   <= estopchain.or
 
 net estop-user    => estop-latch.ok-in
 net estop-error   => estop-latch.fault-in
