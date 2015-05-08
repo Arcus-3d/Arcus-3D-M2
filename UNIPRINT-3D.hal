@@ -49,6 +49,7 @@ loadrt mux_generic config=bb4 # mux-gen.00 for probe
 loadrt conv_float_u32 names=f2u.probe-sel
 loadrt logic_fuse names=logic-fuse.gpio-error,logic-fuse.pwm-error,logic-fuse.temp-error,logic-fuse.hbp-error,logic-fuse.e0-error
 loadrt estop_latch names=estop-latch
+loadrt charge_pump names=charge-pump
 
 loadrt hypot names=hypot.nozzle-vel
 loadrt mult2 names=mult2.nozzle-discharge,mult2.filament-dia,mult2.filament-area,mult2.extrude-accel-adj,mult2.ve-jog-dtg,mult2.retract-vel-neg,mult2.extrude-rate-scaled,mult2.jog-velocity-neg
@@ -150,13 +151,12 @@ addf div2.retract-time                      servo-thread
 addf oneshot.retract                        servo-thread
 addf mux4.ve                                servo-thread
 
+addf   charge-pump                          servo-thread
+
 # Update functions
 addf   gantry.z.write                       servo-thread
 addf   hpg.update                           servo-thread
 addf   bb_gpio.write                        servo-thread
-
-
-#addf   charge-pump                         run-thread
 
 
 # user components
@@ -1287,10 +1287,10 @@ setp watchdog.timeout-2 0.1
 net estop-out => watchdog.enable-in
 
 # drive estop-sw
-#net charge-pump-out charge-pump.out => bb_gpio.p8.out-19
-#net estop-out => charge-pump.enable
-net estop-out => bb_gpio.p8.out-19
-setp bb_gpio.p8.out-19.invert 1
+net charge-pump-out charge-pump.out => bb_gpio.p8.out-19
+net estop-out => charge-pump.enable
+#net estop-out => bb_gpio.p8.out-19
+#setp bb_gpio.p8.out-19.invert 1
 
 # ##################################################
 # UI linking
