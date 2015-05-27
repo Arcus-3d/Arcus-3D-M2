@@ -22,7 +22,7 @@ loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=5 num_ai
 #loadrt threads name1=run-thread period1=50170000
 
 # Gantry component for Z Axis
-loadrt gantry_latching names=gantry.z personality=2
+newinst lgantry gantry.z pincount=2
 
 # load low-level drivers
 loadrt hal_bb_gpio output_pins=807,819,826,926 input_pins=941
@@ -70,7 +70,7 @@ addf   and2.probe                           servo-thread
 addf   motion-controller                    servo-thread
 # HBP
 addf   lowpass.hbp-temp                     servo-thread
-addf   pid.hbp-temp.do-pid-calcs            servo-thread
+addf   pid.hbp-temp                         servo-thread
 addf   sum2.hbp-temp-range-neg              servo-thread
 addf   sum2.hbp-temp-range-pos              servo-thread
 addf   wcomp.hbp-temp-range                 servo-thread
@@ -83,7 +83,7 @@ addf   comp.hbp-active                      servo-thread
 # E0
 addf   scale.e0-fan-comp                    servo-thread
 addf   lowpass.e0-temp                      servo-thread
-addf   pid.e0-temp.do-pid-calcs             servo-thread
+addf   pid.e0-temp                          servo-thread
 addf   limit1.e0-heater                     servo-thread
 addf   sum2.e0-temp-range-neg               servo-thread
 addf   sum2.e0-temp-range-pos               servo-thread
