@@ -1147,15 +1147,15 @@ net exp0.fan.pwm => i2c-pwm.out-09.value
 setp i2c-pwm.out-10.enable 1
 setp i2c-pwm.out-10.value  0.0
 
-# LED-R
+# LED-G
 setp i2c-pwm.out-11.enable 1
 setp i2c-pwm.out-11.value  0.0
-net l0.r-out => i2c-pwm.out-11.value
+net l0.g-out => i2c-pwm.out-11.value
 
-# LED-G
+# LED-R
 setp i2c-pwm.out-12.enable 1
 setp i2c-pwm.out-12.value  0.0
-net l0.g-out => i2c-pwm.out-12.value
+net l0.r-out => i2c-pwm.out-12.value
 
 # LED-B
 setp i2c-pwm.out-13.enable 1
