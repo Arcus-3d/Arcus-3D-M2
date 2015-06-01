@@ -50,16 +50,16 @@ The output value can be tuned using the the factor input
 """;
 license "GPL";
 variable hal_float_t basis = 1.0;
-variable hal_float_t lastInput = 0;
+variable hal_float_t lastInput = 0.0;
 ;;
-#include <math.h>
+#include <rtapi_math.h>
 
 FUNCTION(_) {
     hal_float_t value;
     if (lastInput != input) 
     {
-        basis = rtapi_pow((hal_float_t)max_pwm/(hal_float_t)factor, 1.0 / (hal_float_t)(steps-1.0));
-        value = (factor*rtapi_pow(basis, input*(hal_float_t)steps))/((hal_float_t)(max_pwm));
+        basis = rtapi_pow((hal_float_t)max_pwm/factor, 1.0 / (hal_float_t)(steps-1));
+        value = (factor * rtapi_pow(basis, input * (hal_float_t)steps)) / ((hal_float_t)(max_pwm));
         output = (value > 1.0) ? 1.0 : value;
         lastInput = input;
     }
