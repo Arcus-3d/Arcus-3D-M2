@@ -1,0 +1,5 @@
+o<m163> sub
+#500=50; extruder scale start index
+#502=[#<S>+#500]
+ M67 E#502 Q#<P>
+o<m163> end sub

@@ -18,13 +18,12 @@ os.environ["MACHINEKIT_INI"] = c.MACHINEKIT_INI
 try:
     launcher.check_installation()
     launcher.cleanup_session()
-    launcher.load_bbio_file('paralell_cape3.bbio')
+    launcher.load_bbio_file('cramps_cape.bbio')
     launcher.install_comp('thermistor_check.comp')
     launcher.install_comp('reset.comp')
-    launcher.install_comp('led_dim.comp')
     launcher.install_comp('logic_fuse.comp')
-    launcher.start_process("configserver -n Uni-print-3D ~/Machineface")
-    launcher.start_process('linuxcnc UNIPRINT-3D.ini')
+    launcher.start_process("configserver -n Monster-3D ~/Machineface")
+    launcher.start_process('linuxcnc Monster-3D.ini')
 except subprocess.CalledProcessError:
     launcher.end_session()
     sys.exit(1)
