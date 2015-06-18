@@ -639,23 +639,13 @@ setp hpg.stepgen.07.dirpin          [AXIS_7]DIRPIN
 # ##################################################
 # Standard I/O - EStop, Enables, Limit Switches, Etc
 # ##################################################
-
 # Create estop signal chain
 # Drive software estop to hardware
-newsig estop-user bit
-newsig estop-reset bit
-newsig estop-out bit
-newsig estop-loop bit
-
-# drive estop-sw
-net estop-out => bb_gpio.p8.out-26
+net estop-out iocontrol.0.user-enable-out => bb_gpio.p8.out-26
 setp bb_gpio.p8.out-26.invert 1
 
-net estop-user <= iocontrol.0.user-enable-out
-net estop-reset <= iocontrol.0.user-request-enable
-
 # Monitor estop input from hardware
-net estop-in bb_gpio.p8.in-17 => iocontrol.0.emc-enable-in
+net estop-loop bb_gpio.p8.in-17 => iocontrol.0.emc-enable-in
 setp bb_gpio.p8.in-17.invert 1
 
 # create signals for tool loading loopback
@@ -802,27 +792,27 @@ net e0.temp.meas              => wcomp.e0-temp-limit.in
 net e0.temp.in-limit          <= wcomp.e0-temp-limit.out
 
 # check the thermistor
-net e0.temp.meas              => thermistor-check.e0.temp
-net e0.temp.in-range          => not.e0-temp-range.in
-net e0.temp.in-range_n        <= not.e0-temp-range.out
-net e0.temp.in-range_n        => thermistor-check.e0.enable
-net e0.heaterl                => thermistor-check.e0.pid
-net e0.therm-ok               <= thermistor-check.e0.no-error
+#net e0.temp.meas              => thermistor-check.e0.temp
+#net e0.temp.in-range          => not.e0-temp-range.in
+#net e0.temp.in-range_n        <= not.e0-temp-range.out
+#net e0.temp.in-range_n        => thermistor-check.e0.enable
+#net e0.heaterl                => thermistor-check.e0.pid
+#net e0.therm-ok               <= thermistor-check.e0.no-error
 
 # no error chain
-net e0.therm-ok      => and3.e0-no-error.in-00
-net e0.temp.in-limit => and3.e0-no-error.in-01
-net temp-ok          => and3.e0-no-error.in-02
-net e0.no-error      <= and3.e0-no-error.and
-net e0.no-error      => not.e0-error.in
-net e0.error-in      <= not.e0-error.out
-net e0.error-in      => logic-fuse.e0-error.in
-net e0.error         <= logic-fuse.e0-error.out
+#net e0.therm-ok      => and3.e0-no-error.in-00
+#net e0.temp.in-limit => and3.e0-no-error.in-01
+#net temp-ok          => and3.e0-no-error.in-02
+#net e0.no-error      <= and3.e0-no-error.and
+#net e0.no-error      => not.e0-error.in
+#net e0.error-in      <= not.e0-error.out
+#net e0.error-in      => logic-fuse.e0-error.in
+#net e0.error         <= logic-fuse.e0-error.out
 
-setp comp.e0-active.in0 0.0001
-setp comp.e0-active.hyst 0.0
-net e0.heaterl => comp.e0-active.in1
-net e0.active  <= comp.e0-active.out
+#setp comp.e0-active.in0 0.0001
+#setp comp.e0-active.hyst 0.0
+#net e0.heaterl => comp.e0-active.in1
+#net e0.active  <= comp.e0-active.out
 
 # PID control linking
 net e0.pid.Pgain       fdm-e0-pid.Pgain     <=> pid.e0-temp.Pgain
@@ -859,10 +849,10 @@ net e0.pid.bias pid.e0-temp.bias <= scale.e0-fan-comp.out
 setp scale.e0-fan-comp.gain [EXTRUDER_0]FAN_BIAS
 
 # Thermistor checking
-setp thermistor-check.e0.wait 9.0
-setp thermistor-check.e0.min-pid 1.5 # disable0.25
-setp thermistor-check.e0.min-temp 1.5
-net e0.pid.bias => thermistor-check.e0.bias
+#setp thermistor-check.e0.wait 9.0
+#setp thermistor-check.e0.min-pid 1.5 # disable0.25
+#setp thermistor-check.e0.min-temp 1.5
+#net e0.pid.bias => thermistor-check.e0.bias
 
 
 # Bed temperature control
@@ -925,22 +915,22 @@ net hbp.temp.meas              => wcomp.hbp-temp-limit.in
 net hbp.temp.in-limit          <= wcomp.hbp-temp-limit.out
 
 # check the thermistor
-net hbp.temp.meas              => thermistor-check.hbp.temp
-net hbp.temp.in-range          => not.hbp-temp-range.in
-net hbp.temp.in-range_n        <= not.hbp-temp-range.out
-net hbp.temp.in-range_n        => thermistor-check.hbp.enable
-net hbp.heaterl                => thermistor-check.hbp.pid
-net hbp.therm-ok               <= thermistor-check.hbp.no-error
+#net hbp.temp.meas              => thermistor-check.hbp.temp
+#net hbp.temp.in-range          => not.hbp-temp-range.in
+#net hbp.temp.in-range_n        <= not.hbp-temp-range.out
+#net hbp.temp.in-range_n        => thermistor-check.hbp.enable
+#net hbp.heaterl                => thermistor-check.hbp.pid
+#net hbp.therm-ok               <= thermistor-check.hbp.no-error
 
 # no error chain
-net hbp.therm-ok      => and3.hbp-no-error.in-00
-net hbp.temp.in-limit => and3.hbp-no-error.in-01
-net temp-ok           => and3.hbp-no-error.in-02
-net hbp.no-error      <= and3.hbp-no-error.and
-net hbp.no-error      => not.hbp-error.in
-net hbp.error-in      <= not.hbp-error.out
-net hbp.error-in      => logic-fuse.hbp-error.in
-net hbp.error         <= logic-fuse.hbp-error.out
+#net hbp.therm-ok      => and3.hbp-no-error.in-00
+#net hbp.temp.in-limit => and3.hbp-no-error.in-01
+#net temp-ok           => and3.hbp-no-error.in-02
+#net hbp.no-error      <= and3.hbp-no-error.and
+#net hbp.no-error      => not.hbp-error.in
+#net hbp.error-in      <= not.hbp-error.out
+#net hbp.error-in      => logic-fuse.hbp-error.in
+#net hbp.error         <= logic-fuse.hbp-error.out
 
 setp comp.hbp-active.in0 0.0001
 setp comp.hbp-active.hyst 0.0
@@ -1148,13 +1138,13 @@ net mixer.extrude-scale-e5         <=> fdm-mixer-params.extrude-scale-e5
 net ve.extrude-accel-adj-gain   <=> fdm-ve-params.accel-adj-gain
 
 # monitor the estop error sources
-newg error-sources 100
-newm error-sources estop-user
-newm error-sources temp-ok
-newm error-sources e0.temp.in-limit
-newm error-sources e0.therm-ok
-newm error-sources hbp.temp.in-limit
-newm error-sources hbp.therm-ok
+#newg error-sources 100
+#newm error-sources estop-user
+#newm error-sources temp-ok
+#newm error-sources e0.temp.in-limit
+#newm error-sources e0.therm-ok
+#newm error-sources hbp.temp.in-limit
+#newm error-sources hbp.therm-ok
 
 # ##################################################
 # Storage
