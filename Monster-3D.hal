@@ -1064,38 +1064,38 @@ net ve.jog-trigger      => motion.digital-in-12
 # ##################################################
 # Estop chain, watchdog and charge-pump
 # ##################################################
-net gpio-error    => estopchain.in-00
-net pwm-error     => estopchain.in-01
-net temp-error    => estopchain.in-02
-net hbp.error     => estopchain.in-03
-net e0.error      => estopchain.in-04
-net estop-error   <= estopchain.or
+#net gpio-error    => estopchain.in-00
+#net pwm-error     => estopchain.in-01
+#net temp-error    => estopchain.in-02
+#net hbp.error     => estopchain.in-03
+#net e0.error      => estopchain.in-04
+#net estop-error   <= estopchain.or
 
-net estop-user    => estop-latch.ok-in
-net estop-error   => estop-latch.fault-in
-net estop-reset   => estop-latch.reset
-net estop-out     <= estop-latch.ok-out
-
-net estop-reset => logic-fuse.gpio-error.reset
-setp logic-fuse.gpio-error.wait 0.5
-net estop-reset => logic-fuse.pwm-error.reset
-setp logic-fuse.pwm-error.wait 0.5
-net estop-reset => logic-fuse.temp-error.reset
-setp logic-fuse.temp-error.wait 0.5
-net estop-reset => logic-fuse.hbp-error.reset
-setp logic-fuse.hbp-error.wait 0.5
-net estop-reset => logic-fuse.e0-error.reset
-setp logic-fuse.e0-error.wait 0.5
+#net estop-user    => estop-latch.ok-in
+#net estop-error   => estop-latch.fault-in
+#net estop-reset   => estop-latch.reset
+#net estop-out     <= estop-latch.ok-out
+#
+#net estop-reset => logic-fuse.gpio-error.reset
+#setp logic-fuse.gpio-error.wait 0.5
+#net estop-reset => logic-fuse.pwm-error.reset
+#setp logic-fuse.pwm-error.wait 0.5
+#net estop-reset => logic-fuse.temp-error.reset
+#setp logic-fuse.temp-error.wait 0.5
+#net estop-reset => logic-fuse.hbp-error.reset
+#setp logic-fuse.hbp-error.wait 0.5
+#net estop-reset => logic-fuse.e0-error.reset
+#setp logic-fuse.e0-error.wait 0.5
 
 # TODO watchdog
 
-net gpio-watchdog => watchdog.input-0
-setp watchdog.timeout-0 0.1
-net pwm-watchdog => watchdog.input-1
-setp watchdog.timeout-1 0.2
-net temp-watchdog => watchdog.input-2
-setp watchdog.timeout-2 0.1
-net estop-out => watchdog.enable-in
+#net gpio-watchdog => watchdog.input-0
+#setp watchdog.timeout-0 0.1
+#net pwm-watchdog => watchdog.input-1
+#setp watchdog.timeout-1 0.2
+#net temp-watchdog => watchdog.input-2
+#setp watchdog.timeout-2 0.1
+#net estop-out => watchdog.enable-in
 
 # ##################################################
 # UI linking
