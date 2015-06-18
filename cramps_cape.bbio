@@ -1,6 +1,8 @@
 # File generated with BB pin configurator
 # title: CRAMPS cape
 overlay cape-universal
+overlay cape-bone-iio
+
 P8_07	in	# X Max
 P8_08	in	# X Min
 P8_09	in	# Y Max

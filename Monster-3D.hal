@@ -23,7 +23,7 @@ loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=5 num_ai
 
 # Gantry component for Z Axis
 # load low-level drivers
-loadrt output_pins=816,822,823,824,825,826,914,923,925 input_pins=807,808,809,810,817,911,913
+loadrt hal_bb_gpio output_pins=816,822,823,824,825,826,914,923,925 input_pins=807,808,809,810,817,911,913
 loadrt [PRUCONF](DRIVER) prucode=$(HAL_RTMOD_DIR)/[PRUCONF](PRUBIN) [PRUCONF](CONFIG) halname=hpg
 loadrt delayline names=joints_delay,extruder_delay max_delay=20,5 samples=ffff,f
 
@@ -31,8 +31,6 @@ loadrt delayline names=joints_delay,extruder_delay max_delay=20,5 samples=ffff,f
 loadrt pid names=pid.e0-temp,pid.hbp-temp
 loadrt limit1 names=limit1.e0-heater,limit1.hbp-heater,limit1.mixer-pwm
 loadrt scale names=scale.f0,scale.e0-fan-comp,scale.ve-scale-e1,scale.ve-scale-e2,scale.ve-scale-e3,scale.ve-scale-e4,scale.ve-scale-e5,scale.ve-scale-m1
-loadrt led_dim names=led-dim.l0-r,led-dim.l0-g,led-dim.l0-b,led-dim.l0-w
-loadrt charge_pump
 loadrt thermistor_check names=thermistor-check.e0,thermistor-check.hbp
 loadrt not names=not.e0-temp-range,not.hbp-temp-range,not.e0-error,not.hbp-error
 loadrt wcomp names=wcomp.e0-temp-range,wcomp.hbp-temp-range,wcomp.e0-temp-limit,wcomp.hbp-temp-limit
@@ -139,8 +137,6 @@ addf scale.ve-scale-e3                      servo-thread
 addf scale.ve-scale-e4                      servo-thread
 addf scale.ve-scale-e5                      servo-thread
 
-addf   charge-pump                          servo-thread
-
 # Update functions
 addf   hpg.update                           servo-thread
 addf   bb_gpio.write                        servo-thread
@@ -198,6 +194,7 @@ newpin fdm-ve-params fdm-ve-params.filament-dia     float io
 newpin fdm-ve-params fdm-ve-params.retract-vel      float io
 newpin fdm-ve-params fdm-ve-params.retract-len      float io
 newpin fdm-ve-params fdm-ve-params.extrude-scale    float io
+newpin fdm-ve-params fdm-ve-params.extrude-scale-m1    float io
 newpin fdm-ve-params fdm-ve-params.extrude-scale-e1    float io
 newpin fdm-ve-params fdm-ve-params.extrude-scale-e2    float io
 newpin fdm-ve-params fdm-ve-params.extrude-scale-e3    float io
@@ -473,33 +470,39 @@ net ve.extrude-scale-e1  => scale.ve-scale-e1.gain
 net ve.extrude-vel => scale.ve-scale-e1.in
 net ve.extrude-vel-e1 <= scale.ve-scale-e1.out
 net ve.extrude-vel-e1 => hpg.stepgen.03.velocity-cmd
+sets ve.extrude-scale-e1 1.0
 
 net ve.extrude-scale-e2  => scale.ve-scale-e2.gain
 net ve.extrude-vel => scale.ve-scale-e2.in
 net ve.extrude-vel-e2 <= scale.ve-scale-e2.out
 net ve.extrude-vel-e2 => hpg.stepgen.04.velocity-cmd
+sets ve.extrude-scale-e2 0.0
 
 net ve.extrude-scale-e3  => scale.ve-scale-e3.gain
 net ve.extrude-vel => scale.ve-scale-e3.in
 net ve.extrude-vel-e3 <= scale.ve-scale-e3.out
 net ve.extrude-vel-e3 => hpg.stepgen.05.velocity-cmd
+sets ve.extrude-scale-e3 0.0
 
 net ve.extrude-scale-e4  => scale.ve-scale-e4.gain
 net ve.extrude-vel => scale.ve-scale-e4.in
 net ve.extrude-vel-e4 <= scale.ve-scale-e4.out
 net ve.extrude-vel-e4 => hpg.stepgen.06.velocity-cmd
+sets ve.extrude-scale-e4 0.0
 
 net ve.extrude-scale-e5  => scale.ve-scale-e5.gain
 net ve.extrude-vel => scale.ve-scale-e5.in
 net ve.extrude-vel-e5 <= scale.ve-scale-e5.out
 net ve.extrude-vel-e5 => hpg.stepgen.07.velocity-cmd
+sets ve.extrude-scale-e5 0.0
 
 # scale active mixer speed to match extrude velocity
 
 net ve.extrude-scale-m1  => scale.ve-scale-m1.gain
+sets ve.extrude-scale-m1 0.0
 net ve.extrude-vel => scale.ve-scale-m1.in
 net ve.extrude-vel-m1 <= scale.ve-scale-m1.out
-net ve.extrude-vel-m1 => limit1.mixer-pwm-in
+net ve.extrude-vel-m1 => limit1.mixer-pwm.in
 net ve.mixer-pwm <= limit1.mixer-pwm.out
 setp limit1.mixer-pwm.min 0.0
 setp limit1.mixer-pwm.max 1.0
@@ -576,7 +579,6 @@ setp hpg.stepgen.05.stepspace       [AXIS_5]STEPSPACE
 setp hpg.stepgen.05.position-scale  [AXIS_5]SCALE
 setp hpg.stepgen.05.maxvel          [AXIS_5]STEPGEN_MAX_VEL
 setp hpg.stepgen.05.maxaccel        [AXIS_5]STEPGEN_MAX_ACC
-setp mux2.stepgen03-maxacc.in1      [AXIS_5]STEPGEN_MAX_ACC
 #setp hpg.stepgen.05.step_type       0
 setp hpg.stepgen.05.steppin         [AXIS_5]STEPPIN
 setp hpg.stepgen.05.dirpin          [AXIS_5]DIRPIN
@@ -602,7 +604,6 @@ setp hpg.stepgen.06.stepspace       [AXIS_6]STEPSPACE
 setp hpg.stepgen.06.position-scale  [AXIS_6]SCALE
 setp hpg.stepgen.06.maxvel          [AXIS_6]STEPGEN_MAX_VEL
 setp hpg.stepgen.06.maxaccel        [AXIS_6]STEPGEN_MAX_ACC
-setp mux2.stepgen06-maxacc.in1      [AXIS_6]STEPGEN_MAX_ACC
 #setp hpg.stepgen.06.step_type       0
 setp hpg.stepgen.06.steppin         [AXIS_6]STEPPIN
 setp hpg.stepgen.06.dirpin          [AXIS_6]DIRPIN
@@ -628,7 +629,6 @@ setp hpg.stepgen.07.stepspace       [AXIS_7]STEPSPACE
 setp hpg.stepgen.07.position-scale  [AXIS_7]SCALE
 setp hpg.stepgen.07.maxvel          [AXIS_7]STEPGEN_MAX_VEL
 setp hpg.stepgen.07.maxaccel        [AXIS_7]STEPGEN_MAX_ACC
-setp mux2.stepgen07-maxacc.in1      [AXIS_7]STEPGEN_MAX_ACC
 #setp hpg.stepgen.07.step_type       0
 setp hpg.stepgen.07.steppin         [AXIS_7]STEPPIN
 setp hpg.stepgen.07.dirpin          [AXIS_7]DIRPIN
@@ -1148,8 +1148,6 @@ net ve.extrude-accel-adj-gain   <=> fdm-ve-params.accel-adj-gain
 # monitor the estop error sources
 newg error-sources 100
 newm error-sources estop-user
-newm error-sources gpio-ok
-newm error-sources pwm-ok
 newm error-sources temp-ok
 newm error-sources e0.temp.in-limit
 newm error-sources e0.therm-ok
