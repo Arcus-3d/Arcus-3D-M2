@@ -30,7 +30,7 @@ loadrt delayline names=joints_delay,extruder_delay max_delay=20,5 samples=ffff,f
 # other components
 loadrt pid names=pid.e0-temp,pid.hbp-temp
 loadrt limit1 names=limit1.e0-heater,limit1.hbp-heater,limit1.mixer-pwm
-loadrt scale names=scale.f0,scale.e0-fan-comp,scale.ve-scale-e1,scale.ve-scale-e2,scale.ve-scale-e3,scale.ve-scale-e4,scale.ve-scale-e5,scale.ve-scale-m1
+loadrt scale names=scale.f0,scale.e0-fan-comp,scale.mixer-scale-e1,scale.mixer-scale-e2,scale.mixer-scale-e3,scale.mixer-scale-e4,scale.mixer-scale-e5,scale.mixer-scale-m1
 loadrt thermistor_check names=thermistor-check.e0,thermistor-check.hbp
 loadrt not names=not.e0-temp-range,not.hbp-temp-range,not.e0-error,not.hbp-error
 loadrt wcomp names=wcomp.e0-temp-range,wcomp.hbp-temp-range,wcomp.e0-temp-limit,wcomp.hbp-temp-limit
@@ -130,12 +130,12 @@ addf reset.extruder-en2                     servo-thread
 addf div2.retract-time                      servo-thread
 addf oneshot.retract                        servo-thread
 addf mux4.ve                                servo-thread
-addf scale.ve-scale-m1                      servo-thread
-addf scale.ve-scale-e1                      servo-thread
-addf scale.ve-scale-e2                      servo-thread
-addf scale.ve-scale-e3                      servo-thread
-addf scale.ve-scale-e4                      servo-thread
-addf scale.ve-scale-e5                      servo-thread
+addf scale.mixer-scale-m1                      servo-thread
+addf scale.mixer-scale-e1                      servo-thread
+addf scale.mixer-scale-e2                      servo-thread
+addf scale.mixer-scale-e3                      servo-thread
+addf scale.mixer-scale-e4                      servo-thread
+addf scale.mixer-scale-e5                      servo-thread
 
 # Update functions
 addf   hpg.update                           servo-thread
@@ -194,14 +194,16 @@ newpin fdm-ve-params fdm-ve-params.filament-dia     float io
 newpin fdm-ve-params fdm-ve-params.retract-vel      float io
 newpin fdm-ve-params fdm-ve-params.retract-len      float io
 newpin fdm-ve-params fdm-ve-params.extrude-scale    float io
-newpin fdm-ve-params fdm-ve-params.extrude-scale-m1    float io
-newpin fdm-ve-params fdm-ve-params.extrude-scale-e1    float io
-newpin fdm-ve-params fdm-ve-params.extrude-scale-e2    float io
-newpin fdm-ve-params fdm-ve-params.extrude-scale-e3    float io
-newpin fdm-ve-params fdm-ve-params.extrude-scale-e4    float io
-newpin fdm-ve-params fdm-ve-params.extrude-scale-e5    float io
 newpin fdm-ve-params fdm-ve-params.accel-adj-gain   float io
 ready  fdm-ve-params
+
+newcomp fdm-mixer-params timer=100
+newpin fdm-mixer-params fdm-mixer-params.extrude-scale-m1    float io
+newpin fdm-mixer-params fdm-mixer-params.extrude-scale-e1    float io
+newpin fdm-mixer-params fdm-mixer-params.extrude-scale-e2    float io
+newpin fdm-mixer-params fdm-mixer-params.extrude-scale-e3    float io
+newpin fdm-mixer-params fdm-mixer-params.extrude-scale-e4    float io
+newpin fdm-mixer-params fdm-mixer-params.extrude-scale-e5    float io
 
 newcomp fdm-e0-pid timer=100
 newpin fdm-e0-pid fdm-e0-pid.Pgain              float io
@@ -466,44 +468,44 @@ sets ve.extrude-accel-adj-gain 0.05
 sets ve.extrude-scale 1.0
 
 # scale individual extruder outputs for mixing.
-net ve.extrude-scale-e1  => scale.ve-scale-e1.gain
-net ve.extrude-vel => scale.ve-scale-e1.in
-net ve.extrude-vel-e1 <= scale.ve-scale-e1.out
-net ve.extrude-vel-e1 => hpg.stepgen.03.velocity-cmd
-sets ve.extrude-scale-e1 1.0
+net mixer.extrude-scale-e1  => scale.mixer-scale-e1.gain
+net ve.extrude-vel => scale.mixer-scale-e1.in
+net mixer.extrude-vel-e1 <= scale.mixer-scale-e1.out
+net mixer.extrude-vel-e1 => hpg.stepgen.03.velocity-cmd
+sets mixer.extrude-scale-e1 1.0
 
-net ve.extrude-scale-e2  => scale.ve-scale-e2.gain
-net ve.extrude-vel => scale.ve-scale-e2.in
-net ve.extrude-vel-e2 <= scale.ve-scale-e2.out
-net ve.extrude-vel-e2 => hpg.stepgen.04.velocity-cmd
-sets ve.extrude-scale-e2 0.0
+net mixer.extrude-scale-e2  => scale.mixer-scale-e2.gain
+net ve.extrude-vel => scale.mixer-scale-e2.in
+net mixer.extrude-vel-e2 <= scale.mixer-scale-e2.out
+net mixer.extrude-vel-e2 => hpg.stepgen.04.velocity-cmd
+sets mixer.extrude-scale-e2 0.0
 
-net ve.extrude-scale-e3  => scale.ve-scale-e3.gain
-net ve.extrude-vel => scale.ve-scale-e3.in
-net ve.extrude-vel-e3 <= scale.ve-scale-e3.out
-net ve.extrude-vel-e3 => hpg.stepgen.05.velocity-cmd
-sets ve.extrude-scale-e3 0.0
+net mixer.extrude-scale-e3  => scale.mixer-scale-e3.gain
+net ve.extrude-vel => scale.mixer-scale-e3.in
+net mixer.extrude-vel-e3 <= scale.mixer-scale-e3.out
+net mixer.extrude-vel-e3 => hpg.stepgen.05.velocity-cmd
+sets mixer.extrude-scale-e3 0.0
 
-net ve.extrude-scale-e4  => scale.ve-scale-e4.gain
-net ve.extrude-vel => scale.ve-scale-e4.in
-net ve.extrude-vel-e4 <= scale.ve-scale-e4.out
-net ve.extrude-vel-e4 => hpg.stepgen.06.velocity-cmd
-sets ve.extrude-scale-e4 0.0
+net mixer.extrude-scale-e4  => scale.mixer-scale-e4.gain
+net ve.extrude-vel => scale.mixer-scale-e4.in
+net mixer.extrude-vel-e4 <= scale.mixer-scale-e4.out
+net mixer.extrude-vel-e4 => hpg.stepgen.06.velocity-cmd
+sets mixer.extrude-scale-e4 0.0
 
-net ve.extrude-scale-e5  => scale.ve-scale-e5.gain
-net ve.extrude-vel => scale.ve-scale-e5.in
-net ve.extrude-vel-e5 <= scale.ve-scale-e5.out
-net ve.extrude-vel-e5 => hpg.stepgen.07.velocity-cmd
-sets ve.extrude-scale-e5 0.0
+net mixer.extrude-scale-e5  => scale.mixer-scale-e5.gain
+net ve.extrude-vel => scale.mixer-scale-e5.in
+net mixer.extrude-vel-e5 <= scale.mixer-scale-e5.out
+net mixer.extrude-vel-e5 => hpg.stepgen.07.velocity-cmd
+sets mixer.extrude-scale-e5 0.0
 
 # scale active mixer speed to match extrude velocity
 
-net ve.extrude-scale-m1  => scale.ve-scale-m1.gain
-sets ve.extrude-scale-m1 0.0
-net ve.extrude-vel => scale.ve-scale-m1.in
-net ve.extrude-vel-m1 <= scale.ve-scale-m1.out
-net ve.extrude-vel-m1 => limit1.mixer-pwm.in
-net ve.mixer-pwm <= limit1.mixer-pwm.out
+net mixer.extrude-scale-m1  => scale.mixer-scale-m1.gain
+sets mixer.extrude-scale-m1 0.0
+net ve.extrude-vel => scale.mixer-scale-m1.in
+net mixer.extrude-vel-m1 <= scale.mixer-scale-m1.out
+net mixer.extrude-vel-m1 => limit1.mixer-pwm.in
+net mixer.mixer-pwm <= limit1.mixer-pwm.out
 setp limit1.mixer-pwm.min 0.0
 setp limit1.mixer-pwm.max 1.0
 
@@ -1002,7 +1004,7 @@ net e0.heaterl => hpg.pwmgen.00.out.01.value
 setp hpg.pwmgen.00.out.02.pin       927
 setp hpg.pwmgen.00.out.02.enable    1
 setp hpg.pwmgen.00.out.02.value     0.0
-net ve.mixer-pwm => hpg.pwmgen.00.out.02.value
+net mixer.mixer-pwm => hpg.pwmgen.00.out.02.value
 
 # Cooling Pump FET 4
 setp hpg.pwmgen.00.out.03.pin       921
@@ -1038,13 +1040,13 @@ net ve.filament-dia      <= motion.analog-out-io-44
 net ve.jog-velocity      <= motion.analog-out-io-45
 net ve.jog-distance      <= motion.analog-out-io-46
 
-net ve.extrude-scale-m1  <= motion.analog-out-io-50
+net mixer.extrude-scale-m1  <= motion.analog-out-io-50
 
-net ve.extrude-scale-e1  <= motion.analog-out-io-51
-net ve.extrude-scale-e2  <= motion.analog-out-io-52
-net ve.extrude-scale-e3  <= motion.analog-out-io-53
-net ve.extrude-scale-e4  <= motion.analog-out-io-54
-net ve.extrude-scale-e5  <= motion.analog-out-io-55
+net mixer.extrude-scale-e1  <= motion.analog-out-io-51
+net mixer.extrude-scale-e2  <= motion.analog-out-io-52
+net mixer.extrude-scale-e3  <= motion.analog-out-io-53
+net mixer.extrude-scale-e4  <= motion.analog-out-io-54
+net mixer.extrude-scale-e5  <= motion.analog-out-io-55
 
 net probe.enable         <= motion.digital-out-00
 net ve.extruder-en       <= motion.digital-out-io-01
@@ -1056,12 +1058,12 @@ net hbp.temp.meas        => motion.analog-in-00
 net e0.temp.meas         => motion.analog-in-02
 net f0.set               => motion.analog-in-12
 
-net ve.extrude-scale-m1  <= motion.analog-in-50
-net ve.extrude-scale-e1  => motion.analog-in-51
-net ve.extrude-scale-e2  => motion.analog-in-52
-net ve.extrude-scale-e3  => motion.analog-in-53
-net ve.extrude-scale-e4  => motion.analog-in-54
-net ve.extrude-scale-e5  => motion.analog-in-55
+net mixer.extrude-scale-m1  <= motion.analog-in-50
+net mixer.extrude-scale-e1  => motion.analog-in-51
+net mixer.extrude-scale-e2  => motion.analog-in-52
+net mixer.extrude-scale-e3  => motion.analog-in-53
+net mixer.extrude-scale-e4  => motion.analog-in-54
+net mixer.extrude-scale-e5  => motion.analog-in-55
 
 net hbp.temp.in-range   => motion.digital-in-00
 #net hbc.temp.in-range   => motion.digital-in-01
@@ -1137,12 +1139,12 @@ net ve.filament-dia             <=> fdm-ve-params.filament-dia
 net ve.retract-vel              <=> fdm-ve-params.retract-vel
 net ve.retract-len              <=> fdm-ve-params.retract-len
 net ve.extrude-scale            <=> fdm-ve-params.extrude-scale
-net ve.extrude-scale-m1         <=> fdm-ve-params.extrude-scale-m1
-net ve.extrude-scale-e1         <=> fdm-ve-params.extrude-scale-e1
-net ve.extrude-scale-e2         <=> fdm-ve-params.extrude-scale-e2
-net ve.extrude-scale-e3         <=> fdm-ve-params.extrude-scale-e3
-net ve.extrude-scale-e4         <=> fdm-ve-params.extrude-scale-e4
-net ve.extrude-scale-e5         <=> fdm-ve-params.extrude-scale-e5
+net mixer.extrude-scale-m1         <=> fdm-mixer-params.extrude-scale-m1
+net mixer.extrude-scale-e1         <=> fdm-mixer-params.extrude-scale-e1
+net mixer.extrude-scale-e2         <=> fdm-mixer-params.extrude-scale-e2
+net mixer.extrude-scale-e3         <=> fdm-mixer-params.extrude-scale-e3
+net mixer.extrude-scale-e4         <=> fdm-mixer-params.extrude-scale-e4
+net mixer.extrude-scale-e5         <=> fdm-mixer-params.extrude-scale-e5
 net ve.extrude-accel-adj-gain   <=> fdm-ve-params.accel-adj-gain
 
 # monitor the estop error sources
