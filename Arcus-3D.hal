@@ -156,7 +156,7 @@ addf   bb_gpio.write                        servo-thread
 
 
 # user components
-loadusr -Wn Therm hal_temp_bbb -n Therm -c 04:3950-100k,05:3950-100k -b CRAMPS
+loadusr -Wn Therm hal_temp_bbb -n Therm -c [EXTRUDER_0]ADC_CHANNEL:[EXTRUDER_0]THERMISTOR,[HBP]ADC_CHANNEL:[HBP]THERMISTOR05 -b [MACHINE]CAPE_TYPE
 
 # Python user-mode HAL module for storing values
 loadusr -Wn storage hal_storage -n storage -f storage.ini -a
@@ -1088,8 +1088,8 @@ net f0.pwm => hpg.pwmgen.00.out.04.value
 # ##################################################
 # ADC
 # ##################################################
-net hbp.temp.measr       <= Therm.ch-05.value
-net e0.temp.measr        <= Therm.ch-04.value
+net hbp.temp.measr       <= Therm.ch-[HBP]ADC_CHANNEL.value
+net e0.temp.measr        <= Therm.ch-[EXTRUDER_0]ADC_CHANNEL.value
 
 # ##################################################
 # Motion AIO and DIO
