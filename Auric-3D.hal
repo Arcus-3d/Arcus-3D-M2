@@ -516,7 +516,7 @@ net ew1.scale   <= mult2.ew1.out
 net ew1.scale   => scale.ew1.gain
 net ve.extrude-vel => scale.ew1.in
 net ew1.extrude-vel-weighted <= scale.ew1.out
-net ew1.extrude-vel-weighted => hpg.stepgen.03.velocity-cmd
+net ew1.extrude-vel-weighted => hpg.stepgen.04.velocity-cmd
 sets ew1.scaler 0.01
 sets ew1.weight 0.0
 
@@ -527,7 +527,7 @@ net ew2.scale   <= mult2.ew2.out
 net ew2.scale   => scale.ew2.gain
 net ve.extrude-vel => scale.ew2.in
 net ew2.extrude-vel-weighted <= scale.ew2.out
-net ew2.extrude-vel-weighted => hpg.stepgen.03.velocity-cmd
+net ew2.extrude-vel-weighted => hpg.stepgen.05.velocity-cmd
 sets ew2.scaler 0.01
 sets ew2.weight 0.0
 
@@ -538,7 +538,7 @@ net ew3.scale   <= mult2.ew3.out
 net ew3.scale   => scale.ew3.gain
 net ve.extrude-vel => scale.ew3.in
 net ew3.extrude-vel-weighted <= scale.ew3.out
-net ew3.extrude-vel-weighted => hpg.stepgen.03.velocity-cmd
+net ew3.extrude-vel-weighted => hpg.stepgen.06.velocity-cmd
 sets ew3.scaler 0.01
 sets ew3.weight 0.0
 
@@ -549,7 +549,7 @@ net ew4.scale   <= mult2.ew4.out
 net ew4.scale   => scale.ew4.gain
 net ve.extrude-vel => scale.ew4.in
 net ew4.extrude-vel-weighted <= scale.ew4.out
-net ew4.extrude-vel-weighted => hpg.stepgen.03.velocity-cmd
+net ew4.extrude-vel-weighted => hpg.stepgen.07.velocity-cmd
 sets ew4.scaler 0.01
 sets ew4.weight 0.0
 
@@ -1198,11 +1198,11 @@ net ve.retract-len              <=> fdm-ve-params.retract-len
 net ve.extrude-scale            <=> fdm-ve-params.extrude-scale
 net c0.weight          <=> fdm-c0.weight
 net m0.weight          <=> fdm-m0.weight
-net ec0.weight          <=> fdm-ec0.weight
-net ec1.weight          <=> fdm-ec1.weight
-net ec2.weight          <=> fdm-ec2.weight
-net ec3.weight          <=> fdm-ec3.weight
-net ec4.weight          <=> fdm-ec4.weight
+net ew0.weight          <=> fdm-ew0.weight
+net ew1.weight          <=> fdm-ew1.weight
+net ew2.weight          <=> fdm-ew2.weight
+net ew3.weight          <=> fdm-ew3.weight
+net ew4.weight          <=> fdm-ew4.weight
 net ve.extrude-accel-adj-gain   <=> fdm-ve-params.accel-adj-gain
 
 # monitor the estop error sources
