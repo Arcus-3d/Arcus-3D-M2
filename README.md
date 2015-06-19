@@ -1,5 +1,5 @@
-Monster3D
+Auric-3D
 =====
 
-MachineKit configuration files for the Monster 3D printer prototype
-Velocity extrusion, 5 colors, mixing.
+MachineKit configuration files for the Auric-3D printer prototype
+Velocity extrusion, 5 colors, active mixing.
