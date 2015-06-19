@@ -156,7 +156,7 @@ addf   bb_gpio.write                        servo-thread
 
 
 # user components
-loadusr -Wn Therm hal_temp_bbb -n Therm -c [EXTRUDER_0]ADC_CHANNEL:[EXTRUDER_0]THERMISTOR,[HBP]ADC_CHANNEL:[HBP]THERMISTOR05 -b [MACHINE]CAPE_TYPE
+loadusr -Wn Therm hal_temp_bbb -n Therm -c [EXTRUDER_0]ADC_CHANNEL:[EXTRUDER_0]THERMISTOR,[HBP]ADC_CHANNEL:[HBP]THERMISTOR -b [MACHINE]CAPE_TYPE
 
 # Python user-mode HAL module for storing values
 loadusr -Wn storage hal_storage -n storage -f storage.ini -a
