@@ -2,7 +2,8 @@ Auric-3D
 =====
 
 MachineKit configuration files for the Auric-3D printer prototype.
-CRAMPS compatible, Velocity extrusion, 5 color active mixing.
+
+CRAMPS compatible, Velocity extrusion, 5 color active mixing, Machineface UI. 
 
 clone with
 ```
