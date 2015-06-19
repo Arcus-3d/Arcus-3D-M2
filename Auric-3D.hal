@@ -46,7 +46,7 @@ loadrt conv_float_u32 names=f2u.probe-sel
 loadrt logic_fuse names=logic-fuse.gpio-error,logic-fuse.pwm-error,logic-fuse.temp-error,logic-fuse.hbp-error,logic-fuse.e0-error
 loadrt estop_latch names=estop-latch
 
-loadrt mult2 names=mult2.nozzle-discharge,mult2.filament-dia,mult2.filament-area,mult2.extrude-accel-adj,mult2.ve-jog-dtg,mult2.retract-vel-neg,mult2.extrude-rate-scaled,mult2.jog-velocity-neg,mult2.ew0,mult2.ew1,mult2.ew1,mult2.ew2,mult2.ew3,mult2.ew4,mult2.m0
+loadrt mult2 names=mult2.nozzle-discharge,mult2.filament-dia,mult2.filament-area,mult2.extrude-accel-adj,mult2.ve-jog-dtg,mult2.retract-vel-neg,mult2.extrude-rate-scaled,mult2.jog-velocity-neg,mult2.ew0,mult2.ew1,mult2.ew2,mult2.ew3,mult2.ew4,mult2.m0
 loadrt div2 names=div2.extrude-rate,div2.retract-time,div2.ve-jog-time
 loadrt mux4 names=mux4.ve
 loadrt oneshot names=oneshot.retract,oneshot.ve-jog
