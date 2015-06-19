@@ -1,17 +1,17 @@
-Auric-3D
+Arcus-3D
 =====
 
-MachineKit configuration files for the Auric-3D printer prototype.
+MachineKit configuration files for the Arcus-3D printer prototype.
 
 CRAMPS compatible, Velocity extrusion, 5 color active mixing, Machineface UI. 
 
 clone with
 ```
-git clone git@github.com:darenschwenke/Auric-3D.git --recursive
+git clone git@github.com:darenschwenke/Arcus-3D.git --recursive
 ```
 
 run with
 ```
-cd Auric-3D
+cd Arcus-3D
 mklauncher .
 ```

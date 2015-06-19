@@ -22,7 +22,7 @@ try:
     launcher.install_comp('thermistor_check.comp')
     launcher.install_comp('reset.comp')
     launcher.install_comp('logic_fuse.comp')
-    launcher.start_process("configserver -n Auric-3D ./lib/Auric-Machineface")
+    launcher.start_process("configserver -n Arcus-3D ./lib/Arcus-Machineface")
     launcher.start_process('linuxcnc Auric-3D.ini')
 except subprocess.CalledProcessError:
     launcher.end_session()
