@@ -13,10 +13,14 @@
 
 # kinematics
 loadrt lineardeltakins
+
+# settings for delta printer
+setp lineardeltakins.L [MACHINE]CF_ROD
+setp lineardeltakins.R [MACHINE]DELTA_R
 loadrt tp
 
 # motion controller, get name and thread periods from ini file
-loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=5 num_aio=61 num_dio=21 kins=lineardeltakins #[TRAJ]AXES kins=trivkins
+loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[TRAJ]AXES num_aio=61 num_dio=21 kins=lineardeltakins
 
 # THREADS
 #loadrt threads name1=run-thread period1=50170000
