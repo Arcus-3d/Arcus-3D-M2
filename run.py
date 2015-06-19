@@ -23,7 +23,7 @@ try:
     launcher.install_comp('reset.comp')
     launcher.install_comp('logic_fuse.comp')
     launcher.start_process("configserver -n Arcus-3D ./lib/Arcus-Machineface")
-    launcher.start_process('linuxcnc Auric-3D.ini')
+    launcher.start_process('linuxcnc Arcus-3D.ini')
 except subprocess.CalledProcessError:
     launcher.end_session()
     sys.exit(1)
