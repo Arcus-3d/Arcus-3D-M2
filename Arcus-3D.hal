@@ -1053,7 +1053,9 @@ setp hpg.pwmgen.00.out.00.value     0.0
 net hbp.heaterl => hpg.pwmgen.00.out.00.value
 
 # E0 Heater FET 2
-setp hpg.pwmgen.00.out.01.pin       915
+# wired up backwards.  Normap FET2 pin follows.
+# setp hpg.pwmgen.00.out.01.pin       915
+setp hpg.pwmgen.00.out.01.pin       941
 setp hpg.pwmgen.00.out.01.enable    1
 setp hpg.pwmgen.00.out.01.value     0.0
 net e0.heaterl => hpg.pwmgen.00.out.01.value
@@ -1071,7 +1073,10 @@ setp hpg.pwmgen.00.out.03.value     0.0
 net c0.pwm => hpg.pwmgen.00.out.03.value
 
 # Fan FET 5
-setp hpg.pwmgen.00.out.04.pin       941
+
+# wired up backwards.  Normap FET5 pin follows.
+# setp hpg.pwmgen.00.out.04.pin       941
+setp hpg.pwmgen.00.out.04.pin       915
 setp hpg.pwmgen.00.out.04.enable    1
 setp hpg.pwmgen.00.out.04.value     0.0
 net f0.pwm => hpg.pwmgen.00.out.04.value
