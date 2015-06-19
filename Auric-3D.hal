@@ -29,7 +29,7 @@ loadrt delayline names=joints_delay,extruder_delay max_delay=20,5 samples=ffff,f
 
 # other components
 loadrt pid names=pid.e0-temp,pid.hbp-temp
-loadrt limit1 names=limit1.e0-heater,limit1.hbp-heater,limit1.m0-pwm
+loadrt limit1 names=limit1.e0-heater,limit1.hbp-heater,limit1.m0
 loadrt scale names=scale.f0,scale.e0-fan-comp,scale.m0,scale.ew0,scale.ew1,scale.ew2,scale.ew3,scale.ew4,scale.c0
 loadrt thermistor_check names=thermistor-check.e0,thermistor-check.hbp
 loadrt not names=not.e0-temp-range,not.hbp-temp-range,not.e0-error,not.hbp-error
@@ -79,7 +79,6 @@ addf   scale.e0-fan-comp                    servo-thread
 addf   lowpass.e0-temp                      servo-thread
 addf   pid.e0-temp.do-pid-calcs             servo-thread
 addf   limit1.e0-heater                     servo-thread
-addf   limit1.mixer-pwm                     servo-thread
 addf   sum2.e0-temp-range-neg               servo-thread
 addf   sum2.e0-temp-range-pos               servo-thread
 addf   wcomp.e0-temp-range                  servo-thread
@@ -135,6 +134,7 @@ addf scale.c0                               servo-thread
 # mixing
 addf mult2.m0                               servo-thread
 addf scale.m0                               servo-thread
+addf limit1.m0                              servo-thread
 addf mult2.ew0                              servo-thread
 addf scale.ew0                              servo-thread
 addf mult2.ew1                              servo-thread
@@ -561,15 +561,15 @@ net m0.scaler  => mult2.m0.in1
 net m0.scale   <= mult2.m0.out
 net m0.scale   => scale.m0.gain
 net ve.extrude-vel => scale.m0.in
-net m0.pwm-scaled <= scale.m0.out
+net m0.pwm <= scale.m0.out
 sets m0.scaler 0.001
 sets m0.weight 100.0
 
 # mixer off for retract, limit to positive values.
-net m0.pwm-scaled => limit1.m0-pwm.in
-net m0.pwml <= limit1.m0-pwm.out
-setp limit1.m0-pwm.min 0.0
-setp limit1.m0-pwm.max 1.0
+net m0.pwm => limit1.m0.in
+net m0.pwml <= limit1.m0.out
+setp limit1.m0.min 0.0
+setp limit1.m0.max 1.0
 
 # Extruder 1
 # axis enable chain
