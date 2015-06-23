@@ -566,7 +566,7 @@ net m0.scale   <= mult2.m0.out
 net m0.scale   => scale.m0.gain
 net ve.extrude-vel => scale.m0.in
 net m0.pwm <= scale.m0.out
-sets m0.scaler 0.001
+sets m0.scaler [EXTRUDER_0]MIXER_BIAS
 sets m0.weight 100.0
 
 # mixer off for retract, limit to positive values.
