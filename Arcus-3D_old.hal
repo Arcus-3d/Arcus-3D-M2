@@ -29,7 +29,7 @@ loadrt [EMCMOT]EMCMOT servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[TRAJ]AX
 # load low-level drivers
 loadrt hal_bb_gpio output_pins=816,822,823,824,825,826,914,923,925 input_pins=807,808,809,810,817,911,913
 loadrt [PRUCONF](DRIVER) prucode=$(HAL_RTMOD_DIR)/[PRUCONF](PRUBIN) [PRUCONF](CONFIG) halname=hpg
-#loadrt delayline names=joints_delay,extruder_delay max_delay=20,5 samples=ffff,f
+loadrt delayline names=joints_delay,extruder_delay max_delay=20,5 samples=ffff,f
 
 # other components
 loadrt pid names=pid.e0-temp,pid.hbp-temp
@@ -40,10 +40,13 @@ loadrt not names=not.e0-temp-range,not.hbp-temp-range,not.e0-error,not.hbp-error
 loadrt wcomp names=wcomp.e0-temp-range,wcomp.hbp-temp-range,wcomp.e0-temp-limit,wcomp.hbp-temp-limit
 loadrt lowpass names=lowpass.e0-temp,lowpass.hbp-temp
 loadrt sum2 names=sum2.e0-temp-range-neg,sum2.e0-temp-range-pos,sum2.hbp-temp-range-neg,sum2.hbp-temp-range-pos,sum2.extrude-rate-adj
-loadrt mux2 names=mux2.ve-base-vel,mux2.jog-velocity-signed,mux2.pwm-period,mux2.pwm-source
+loadrt and2 names=and2.probe
+loadrt mux2 names=mux2.ve-base-vel,mux2.jog-velocity-signed
 loadrt logic names=estopchain,and3.e0-no-error,and3.hbp-no-error personality=0x205,0x103,0x103 # or 5 and 3 inputs
 loadrt comp names=comp.hbp-hot,comp.hbp-info,comp.e0-active,comp.hbp-active
 loadrt watchdog num_inputs=3
+loadrt mux_generic config=bb4 # mux-gen.00 for probe
+loadrt conv_float_u32 names=f2u.probe-sel
 loadrt logic_fuse names=logic-fuse.gpio-error,logic-fuse.pwm-error,logic-fuse.temp-error,logic-fuse.hbp-error,logic-fuse.e0-error
 loadrt estop_latch names=estop-latch
 
@@ -59,8 +62,9 @@ loadrt reset names=reset.extruder-en1,reset.extruder-en2
 addf   hpg.capture-position                 servo-thread
 addf   bb_gpio.read                         servo-thread
 addf   motion-command-handler               servo-thread
-addf   mux2.pwm-period                      servo-thread
-addf   mux2.pwm-source                      servo-thread
+addf   f2u.probe-sel                        servo-thread
+addf   mux-gen.00                           servo-thread
+addf   and2.probe                           servo-thread
 addf   motion-controller                    servo-thread
 # HBP
 addf   lowpass.hbp-temp                     servo-thread
@@ -562,7 +566,7 @@ net m0.scale   <= mult2.m0.out
 net m0.scale   => scale.m0.gain
 net ve.extrude-vel => scale.m0.in
 net m0.pwm <= scale.m0.out
-sets m0.scaler 0.001
+sets m0.scaler [EXTRUDER_0]MIXER_BIAS
 sets m0.weight 100.0
 
 # mixer off for retract, limit to positive values.
@@ -739,7 +743,7 @@ net limit-x-min <= bb_gpio.p8.in-08
 net limit-x-max <= bb_gpio.p8.in-07
 net limit-y-min <= bb_gpio.p8.in-10
 net limit-y-max <= bb_gpio.p8.in-09
-# net limit-z-min <= bb_gpio.p9.in-13
+net limit-z-min <= bb_gpio.p9.in-13
 net limit-z-max <= bb_gpio.p9.in-11
 
 # Adjust as needed for your switch polarity
@@ -766,11 +770,27 @@ net limit-z-max => axis.2.home-sw-in
 # ################
 # Probe
 # ################
+newsig probe.input              bit
 newsig probe.enable             bit
 newsig probe.signal             bit
-net probe.signal <= bb_gpio.p9.in-13
-net probe.signal => motion.probe-input
-setp bb_gpio.p9.in-13.invert 0
+newsig probe.muxed              bit
+newsig probe.sel                u32
+newsig probe.sel-f              float
+
+net probe.sel-f => f2u.probe-sel.in
+net probe.sel  <= f2u.probe-sel.out
+
+net probe.sel    => mux-gen.00.sel-int
+net probe.muxed  <= mux-gen.00.out-bit
+net probe.signal => mux-gen.00.in-bit-00
+net limit-x-home => mux-gen.00.in-bit-01
+net limit-y-home => mux-gen.00.in-bit-02
+net home-z       => mux-gen.00.in-bit-03
+
+net probe.muxed  => and2.probe.in0
+net probe.enable => and2.probe.in1
+net probe.input  <= and2.probe.out
+net probe.input  => motion.probe-input
 
 
 # ##################################################
@@ -1027,11 +1047,8 @@ net c0.pwm <= scale.c0.out
 # ##################################################
 # PWM
 # ##################################################
-net probe.enable => mux2.pwm-period.sel
-setp mux2.pwm-period.in0 10000000
-setp mux2.pwm-period.in1 25000
-net pwm-period mux2.pwm-period.out => hpg.pwmgen.00.pwm_period
-#setp hpg.pwmgen.00.pwm_period       10000000
+
+setp hpg.pwmgen.00.pwm_period       10000000
 
 # Bed Heater FET 1
 setp hpg.pwmgen.00.out.00.pin       811
@@ -1040,7 +1057,8 @@ setp hpg.pwmgen.00.out.00.value     0.0
 net hbp.heaterl => hpg.pwmgen.00.out.00.value
 
 # E0 Heater FET 2
-setp hpg.pwmgen.00.out.01.pin       915
+# wired up backwards.  Normap FET2 pin follows.
+# setp hpg.pwmgen.00.out.01.pin       915
 setp hpg.pwmgen.00.out.01.pin       941
 setp hpg.pwmgen.00.out.01.enable    1
 setp hpg.pwmgen.00.out.01.value     0.0
@@ -1060,7 +1078,8 @@ net c0.pwm => hpg.pwmgen.00.out.03.value
 
 # Fan FET 5
 
-setp hpg.pwmgen.00.out.04.pin       941
+# wired up backwards.  Normap FET5 pin follows.
+# setp hpg.pwmgen.00.out.04.pin       941
 setp hpg.pwmgen.00.out.04.pin       915
 setp hpg.pwmgen.00.out.04.enable    1
 setp hpg.pwmgen.00.out.04.value     0.0
@@ -1080,6 +1099,7 @@ net hbp.temp.set         <= motion.analog-out-io-00
 #net hbc.temp.set         <= motion.analog-out-io-01
 net e0.temp.set          <= motion.analog-out-io-02
 net f0.set               <= motion.analog-out-io-12
+net probe.sel-f          <= motion.analog-out-38
 net ve.cross-section     <= motion.analog-out-41
 net ve.line-width        <= motion.analog-out-42
 net ve.line-height       <= motion.analog-out-43
