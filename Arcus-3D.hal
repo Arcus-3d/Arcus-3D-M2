@@ -44,6 +44,7 @@ loadrt mux2 names=mux2.ve-base-vel,mux2.jog-velocity-signed,mux2.pwm-period,mux2
 loadrt logic names=estopchain,and3.e0-no-error,and3.hbp-no-error personality=0x205,0x103,0x103 # or 5 and 3 inputs
 loadrt comp names=comp.hbp-hot,comp.hbp-info,comp.e0-active,comp.hbp-active
 loadrt watchdog num_inputs=3
+loadrt conv_float_u32 names=f2u.pwm-period
 loadrt logic_fuse names=logic-fuse.gpio-error,logic-fuse.pwm-error,logic-fuse.temp-error,logic-fuse.hbp-error,logic-fuse.e0-error
 loadrt estop_latch names=estop-latch
 
@@ -89,6 +90,7 @@ addf   not.e0-error                         servo-thread
 addf   comp.e0-active                       servo-thread
 # F0
 addf   scale.f0                             servo-thread
+addf   f2u.pwm-period                       servo-thread
 
 addf   comp.hbp-hot                         servo-thread
 addf   comp.hbp-info                        servo-thread
@@ -1030,7 +1032,8 @@ net c0.pwm <= scale.c0.out
 net probe.enable => mux2.pwm-period.sel
 setp mux2.pwm-period.in0 10000000
 setp mux2.pwm-period.in1 25000
-net pwm-period mux2.pwm-period.out => hpg.pwmgen.00.pwm_period
+net pwm-period-f mux2.pwm-period.out => f2u.pwm-period.in
+net pwm-period f2u.pwm-period.out => hpg.pwmgen.00.pwm_period
 #setp hpg.pwmgen.00.pwm_period       10000000
 
 # Bed Heater FET 1
