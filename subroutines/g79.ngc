@@ -1,6 +1,6 @@
 o<g79> sub
 G0 Z0
 G0 X0.0 Y0.0
-G0 Z0
+G0 Z-20
 o<g79> endsub
 M2
