@@ -29,7 +29,7 @@ from math import sin, cos, pi
 import os
 from argparse import ArgumentParser
     
-DEF_RADIUS = 227
+DEF_RADIUS = 200
 DEF_Z_DEPTH = 20
 DEF_DIR = "../subroutines"
 DEF_G_CODE_BASE = 70

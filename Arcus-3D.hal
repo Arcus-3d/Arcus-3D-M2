@@ -564,7 +564,7 @@ net m0.scale   <= mult2.m0.out
 net m0.scale   => scale.m0.gain
 net ve.extrude-vel => scale.m0.in
 net m0.pwm <= scale.m0.out
-sets m0.scaler 0.001
+sets m0.scaler 0.01
 sets m0.weight 100.0
 
 # mixer off for retract, limit to positive values.
@@ -1017,13 +1017,14 @@ newsig f0.set          float
 setp scale.f0.gain 0.00392156862745
 net f0.set => scale.f0.in
 net f0.pwm <= scale.f0.out
-# Cooling
 
+# Cooling
 # ---------------------------
 newsig c0.set          float
 setp scale.c0.gain 0.01
 net c0.weight => scale.c0.in
 net c0.pwm <= scale.c0.out
+sets c0.set 50.0
 
 
 # ##################################################
@@ -1208,10 +1209,18 @@ net ve.extrude-accel-adj-gain   <=> fdm-ve-params.accel-adj-gain
 # Storage
 # ##################################################
 
-net ve.retract-vel     <=> storage.retract.velocity
-net ve.retract-len     <=> storage.retract.length
-net ve.filament-dia    <=> storage.filament.diameter
-net ve.jog-velocity    <=> storage.extruder.jog-velocity
+net ve.retract-vel     <=> storage.ve.retract-vel
+net ve.retract-len     <=> storage.ve.retract-len
+net ve.filament-dia    <=> storage.ve.filament-dia
+net ve.jog-velocity    <=> storage.ve.jog-velocity
+net ve.extrude-scale   <=> storage.ve.extrude-scale
+net c0.weight          <=> storage.cm.cooling-weight
+net m0.weight          <=> storage.cm.mixer-weight
+net ew0.weight          <=> storage.cm.ew0-weight
+net ew1.weight          <=> storage.cm.ew1-weight
+net ew2.weight          <=> storage.cm.ew2-weight
+net ew3.weight          <=> storage.cm.ew3-weight
+net ew4.weight          <=> storage.cm.ew4-weight
 setp storage.read-trigger 1 # trigger read
 
 # start haltalk server after everything is initialized
