@@ -1,13 +1,13 @@
 import qbs
 
 MachinekitApplication {
-    name: "Monster-3D"
-    halFiles: ["monster.hal",
+    name: "Arcus-3D"
+    halFiles: ["Arcus-3D.hal",
                "velocity-extruding.hal"]
-    configFiles: ["monster.ini"]
+    configFiles: ["Arcus-3D.ini"]
     bbioFiles: ["cramps_cape.bbio"]
     otherFiles: ["tool.tbl", "subroutines"]
     compFiles: ["thermistor_check.comp"]
-    linuxcncIni: "monster.ini"
+    linuxcncIni: "Arcus-3D.ini"
     //display: "thinkpad.local:0.0"
 }
