@@ -1,9 +1,10 @@
-Arcus-3D
+Arcus-3D-M1
 =====
+MachineKit configuration files for the Arcus-3D-M1 printer prototype.
 
-MachineKit configuration files for the Arcus-3D printer prototype.
+[[./images/Arcus-3D.jpg]]
 
-CRAMPS compatible, Velocity extrusion, 5 color active mixing, Machineface UI. 
+CRAMPS compatible, Linear Delta, Velocity extrusion, 5 color active mixing, Machineface UI. 
 
 clone with
 ```
