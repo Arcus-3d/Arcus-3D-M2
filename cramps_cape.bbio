@@ -12,7 +12,7 @@ P8_12	low	# X Dir
 P8_13	low	# X Step
 P8_14	low	# Y Dir
 P8_15	low	# Y Step
-P8_16	high	# eMMC Enable
+P8_16	low	# eMMC Enable
 P8_17	in	# ESTOP
 P8_18	low	# Z Dir
 P8_19	low	# Z Step

@@ -20,8 +20,8 @@ try:
     launcher.cleanup_session()
     launcher.load_bbio_file('cramps_cape.bbio')
     launcher.install_comp('reset.comp')
-    launcher.start_process("configserver -n Arcus-3D-M1 ./lib/Arcus-Machineface")
-    launcher.start_process('linuxcnc Arcus-3D-M1.ini')
+    launcher.start_process("configserver -n Arcus-3D-M2 ./lib/Arcus-Machineface")
+    launcher.start_process('linuxcnc Arcus-3D-M2.ini')
 except subprocess.CalledProcessError:
     launcher.end_session()
     sys.exit(1)
