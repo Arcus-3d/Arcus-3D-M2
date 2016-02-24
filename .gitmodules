@@ -1,4 +1,4 @@
 [submodule "lib/Arcus-Machineface"]
 	path = lib/Arcus-Machineface
-	url = git@github.com:Arcus-3d/Arcus-Machineface.git
+	url = https://github.com/Arcus-3d/Arcus-Machineface.git
 	branch = master
