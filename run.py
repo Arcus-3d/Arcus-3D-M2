@@ -19,11 +19,9 @@ try:
     launcher.check_installation()
     launcher.cleanup_session()
     launcher.load_bbio_file('cramps_cape.bbio')
-    launcher.install_comp('thermistor_check.comp')
     launcher.install_comp('reset.comp')
-    launcher.install_comp('logic_fuse.comp')
-    launcher.start_process("configserver -n Arcus-3D ./lib/Arcus-Machineface")
-    launcher.start_process('linuxcnc Arcus-3D.ini')
+    launcher.start_process("configserver -n Arcus-3D-M1 ./lib/Arcus-Machineface")
+    launcher.start_process('linuxcnc Arcus-3D-M1.ini')
 except subprocess.CalledProcessError:
     launcher.end_session()
     sys.exit(1)

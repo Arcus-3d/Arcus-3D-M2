@@ -5,15 +5,16 @@ CRAMPS compatible, Linear Delta, Velocity extrusion, 5 color active mixing, Mach
 
 clone with
 ```
-git clone git@github.com:darenschwenke/Arcus-3D.git --recursive
+git clone git@github.com:Arcus-3d/Arcus-3D-M1.git --recursive
 ```
 
 run with
 ```
-cd Arcus-3D
+cd Arcus-3D-M1
 mklauncher .
 ```
+
 #+CAPTION: CD4046B Block Diagramm
 #+NAME:   fig:cd4046
 #+name: fig:cd4046
-[[./images/Arcus-3D.jpg]]
+[[./images/Arcus-3D-M1.jpg]]
