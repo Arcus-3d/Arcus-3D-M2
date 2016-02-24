@@ -67,7 +67,6 @@ addf   wcomp.hbp-temp-range                 servo-thread
 addf   not.hbp-temp-range                   servo-thread
 addf   wcomp.hbp-temp-limit                 servo-thread
 addf   limit1.hbp-heater                    servo-thread
-addf   and3.hbp-no-error                    servo-thread
 addf   not.hbp-error                        servo-thread
 addf   comp.hbp-active                      servo-thread
 # E0
