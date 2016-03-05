@@ -995,7 +995,7 @@ net e0.heaterl => hpg.pwmgen.00.out.01.value
 # Active Mixer FET 3
 setp hpg.pwmgen.00.out.02.pin       927
 setp hpg.pwmgen.00.out.02.enable    1
-setp hpg.pwmgen.00.out.02.value     [EXTRUDER_0]MIXER_PWM_MIN
+setp hpg.pwmgen.00.out.02.value     [MIXER]PWM_MIN
 net m0.pwm-limited => hpg.pwmgen.00.out.02.value
 
 # Cooling Pump FET 4
