@@ -39,12 +39,11 @@ loadrt not names=not.e0-temp-range,not.hbp-temp-range,not.e0-error,not.hbp-error
 loadrt wcomp names=wcomp.e0-temp-range,wcomp.hbp-temp-range,wcomp.e0-temp-limit,wcomp.hbp-temp-limit
 loadrt lowpass names=lowpass.e0-temp,lowpass.hbp-temp
 loadrt sum2 names=sum2.e0-temp-range-neg,sum2.e0-temp-range-pos,sum2.hbp-temp-range-neg,sum2.hbp-temp-range-pos,sum2.extrude-rate-adj,sum2.m0-offset
-loadrt mux2 names=mux2.ve-base-vel,mux2.jog-velocity-signed
+loadrt mux2 names=mux2.ve-base-vel,mux2.jog-velocity-signed,mux2.m0-enable
 loadrt logic names=estopchain personality=0x205
 loadrt comp names=comp.hbp-hot,comp.hbp-info,comp.e0-active,comp.hbp-active
 loadrt watchdog num_inputs=3
 loadrt estop_latch names=estop-latch
-loadrt lincurve names=lincurve.m0 personality=4
 
 loadrt mult2 names=mult2.nozzle-discharge,mult2.filament-dia,mult2.filament-area,mult2.extrude-accel-adj,mult2.ve-jog-dtg,mult2.retract-vel-neg,mult2.extrude-rate-scaled,mult2.jog-velocity-neg,mult2.ew0,mult2.ew1,mult2.ew2,mult2.ew3,mult2.ew4,mult2.m0
 loadrt div2 names=div2.extrude-rate,div2.retract-time,div2.ve-jog-time
@@ -118,11 +117,12 @@ addf mux4.ve                                servo-thread
 
 # cooling
 addf scale.c0                               servo-thread
+
 # mixing
+addf mux2.m0-enable                         servo-thread
 addf mult2.m0                               servo-thread
 addf sum2.m0-offset                         servo-thread
 addf scale.m0                               servo-thread
-addf lincurve.m0                            servo-thread
 addf limit1.m0                              servo-thread
 addf mult2.ew0                              servo-thread
 addf scale.ew0                              servo-thread
@@ -554,15 +554,21 @@ net m0.weight  => mult2.m0.in0
 net ve.extrude-vel  => mult2.m0.in1
 net m0.extrude-vel-weighted    <= mult2.m0.out
 
-net m0.extrude-vel-weighted => scale.m0.in
-setp scale.m0.gain 0.0002
-setp scale.m0.offset 0.035
+# disable mixer when print head is not at temp
+net e0.temp.in-range    => mux2.m0-enable.sel
+setp mux2.m0-enable.in0 0.0
+net m0.extrude-vel-weighted => mux2.m0-enable.in1
+net m0.enabled-scale <= mux2.m0-enable.out
+
+net m0.enabled-scale => scale.m0.in
+setp scale.m0.gain [MIXER]PWM_GAIN
+setp scale.m0.offset [MIXER]PWM_OFFSET
 net m0.pwm-weighted <= scale.m0.out
 
 # mixer off for retract, limit to positive values.
 net m0.pwm-weighted => limit1.m0.in
-setp limit1.m0.min 0.035
-setp limit1.m0.max 0.7
+setp limit1.m0.min [MIXER]PWM_MIN
+setp limit1.m0.max [MIXER]PWM_MAX
 net m0.pwm-limited <= limit1.m0.out
 
 # Extruder 1
@@ -986,7 +992,7 @@ net e0.heaterl => hpg.pwmgen.00.out.01.value
 # Active Mixer FET 3
 setp hpg.pwmgen.00.out.02.pin       927
 setp hpg.pwmgen.00.out.02.enable    1
-setp hpg.pwmgen.00.out.02.value     0.0
+setp hpg.pwmgen.00.out.02.value     [EXTRUDER_0]MIXER_PWM_MIN
 net m0.pwm-limited => hpg.pwmgen.00.out.02.value
 
 # Cooling Pump FET 4
