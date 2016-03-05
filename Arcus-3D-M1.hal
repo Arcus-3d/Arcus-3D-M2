@@ -546,30 +546,6 @@ net ew4.extrude-vel-weighted => hpg.stepgen.07.velocity-cmd
 sets ew4.scaler 0.01
 sets ew4.weight 0.0
 
-# scale active Mixer speed to match extrude velocity
-
-newsig m0.weight float
-sets m0.weight 100.0
-net m0.weight  => mult2.m0.in0
-net ve.extrude-vel  => mult2.m0.in1
-net m0.extrude-vel-weighted    <= mult2.m0.out
-
-# disable mixer when print head is not at temp
-net e0.temp.in-range    => mux2.m0-enable.sel
-setp mux2.m0-enable.in0 0.0
-net m0.extrude-vel-weighted => mux2.m0-enable.in1
-net m0.enabled-scale <= mux2.m0-enable.out
-
-net m0.enabled-scale => scale.m0.in
-setp scale.m0.gain [MIXER]PWM_GAIN
-setp scale.m0.offset [MIXER]PWM_OFFSET
-net m0.pwm-weighted <= scale.m0.out
-
-# mixer off for retract, limit to positive values.
-net m0.pwm-weighted => limit1.m0.in
-setp limit1.m0.min [MIXER]PWM_MIN
-setp limit1.m0.max [MIXER]PWM_MAX
-net m0.pwm-limited <= limit1.m0.out
 
 # Extruder 1
 # axis enable chain
@@ -969,6 +945,33 @@ net c0.weight => scale.c0.in
 net c0.pwm <= scale.c0.out
 sets c0.set 50.0
 
+# ##################################################
+# Mixer
+# ##################################################
+# scale active Mixer speed to match extrude velocity
+newsig m0.weight float
+sets m0.weight 100.0
+net m0.weight  => mult2.m0.in0
+net ve.extrude-vel  => mult2.m0.in1
+net m0.extrude-vel-weighted    <= mult2.m0.out
+
+# disable mixer when print head is not at temp
+net e0.temp.in-range    => mux2.m0-enable.sel
+setp mux2.m0-enable.in0 0.0
+net m0.extrude-vel-weighted => mux2.m0-enable.in1
+net m0.enabled-scale <= mux2.m0-enable.out
+
+net m0.enabled-scale => scale.m0.in
+setp scale.m0.gain [MIXER]PWM_GAIN
+setp scale.m0.offset [MIXER]PWM_OFFSET
+net m0.pwm-weighted <= scale.m0.out
+
+# mixer off for retract, limit to positive values
+# in range for speed controller
+net m0.pwm-weighted => limit1.m0.in
+setp limit1.m0.min [MIXER]PWM_MIN
+setp limit1.m0.max [MIXER]PWM_MAX
+net m0.pwm-limited <= limit1.m0.out
 
 # ##################################################
 # PWM
