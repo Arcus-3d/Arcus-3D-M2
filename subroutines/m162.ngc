@@ -1,0 +1,4 @@
+o<m162> sub
+#500=50; mixer scale index
+ M67 E#500 Q#<P>
+o<m162> end sub
