@@ -1,4 +1,4 @@
-Arcus-3D-M1
+Arcus-3D-M2
 =====
 MachineKit configuration files for the Arcus-3D-M2 printer prototype.
 CRAMPS compatible, Linear Delta, Velocity extrusion, 6 color active mixing, Machineface UI. 
