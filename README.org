@@ -1,20 +1,20 @@
 Arcus-3D-M1
 =====
-MachineKit configuration files for the Arcus-3D-M1 printer prototype.
-CRAMPS compatible, Linear Delta, Velocity extrusion, 5 color active mixing, Machineface UI. 
+MachineKit configuration files for the Arcus-3D-M2 printer prototype.
+CRAMPS compatible, Linear Delta, Velocity extrusion, 6 color active mixing, Machineface UI. 
 
 clone with
 ```
-git clone https://github.com/Arcus-3d/Arcus-3D-M1.git --recursive
+git clone https://github.com/Arcus-3d/Arcus-3D-M2.git --recursive
 ```
 
 run with
 ```
-cd Arcus-3D-M1
+cd Arcus-3D-M2
 mklauncher .
 ```
 
 #+CAPTION: CD4046B Block Diagramm
 #+NAME:   fig:cd4046
 #+name: fig:cd4046
-[[./images/Arcus-3D-M1.jpg]]
+[[./images/Arcus-3D-M2.jpg]]
